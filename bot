@@ -1,0 +1,94 @@
+from email.message import Message
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
+import os
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# start - Начать работу с ботом
+# commands - Список возможных встроенных функции
+# calculation_of_loan - Рассчитать кредит
+# request - Оставить заявку
+
+global flag, your_str, d, flag2, trouble
+flag = False
+your_str = ''
+d = 0
+flag2 = False
+trouble = ''
+
+bot = Bot(token = '5465401291:AAFodiuV4N6P-SaAyRM0PG2YDwHO5PygVNo')
+dp = Dispatcher(bot)
+
+@dp.message_handler(commands = 'start')
+async def new_message(message: types.Message):
+    print(message.text)
+    await bot.send_message(message.from_user.id, 'Здравствуйте, в левом нижнем углу выберите нужную функцию для работы с ботом.')
+
+mainn = InlineKeyboardMarkup(row_width = 2)
+urlButton = InlineKeyboardButton(text = ' Branches ', callback_data = '1')
+urlButton2 = InlineKeyboardButton(text = ' Support Service ', callback_data = '2')
+urlButton3 = InlineKeyboardButton(text = ' Personal Account ', url = 'https://ibank.kzibank.kz/ibank/LoginNewFiz.aspx ')
+urlButton4 = InlineKeyboardButton(text = ' Business Account ', url = 'https://ibank.kzibank.kz/ibank/LoginNew.aspx')
+
+mainn.add(urlButton, urlButton2, urlButton3, urlButton4)
+
+@dp.message_handler(commands = 'commands')
+async def url_command(message : types.Message):
+    await message.answer('Functions: ', reply_markup = mainn)
+
+
+@dp.message_handler(commands = 'request')
+async def request(message : types.Message):
+    await message.answer('В случае если у вас возникли дополнительные вопросы, напишите своё имя, номер телефона и ситуацию одним сообщением. Мы обязательно с вами свяжемся\nПример: kzir Нурлан, 87077827068, нужны деньги быстро.')
+
+@dp.message_handler(commands = 'calculation_of_loan')
+async def loan(message : types.Message):
+    await message.answer('Напишите пожалуйста через пробел в одну линию: \nСумма которую вы хотите получить? \nНа сколько месяцев хотели бы получить кредит?\nПример: cl 1000000 3')
+
+
+@dp.callback_query_handler(text = '1')
+async def func1(callback : types.CallbackQuery):
+    await callback.message.answer('Branches: 7 \n Cities: 6')
+    await callback.message.answer('Almaty city: 2 \n*) 132 Klochkov Str. \n*) 59 Haji Mukan Str.')
+    await callback.message.answer('Aqtau city: 1 \n *) 17th microdistrict, apt.39, 1st floor, Zodiac Business centеer.')
+    await callback.message.answer('Atyrau city: 1 \n *) Baktigerey Kulmanov Str.')
+    await callback.message.answer('Nur Sultan city: 1 \n *) 12/1 Kunaev Str.')
+    await callback.message.answer('Qaraghandy city: 1 \n *) 20 Abdirov str.')
+    await callback.message.answer('Shymkent city: 1 \n *) 59 Kunaev Str.')
+    await callback.answer('Список филиалов был выслан', show_alert = True)
+
+@dp.callback_query_handler(text = '2')
+async def func2(callback : types.CallbackQuery):
+    await callback.message.answer('Support service: \n\n Almaty city: +7 (727) 250 6080 \n Aqtau city: +7 (729) 220 4933 \n Atyrau city: +7 (712) 276 0199 \n Nur Sultan city: +7 (717) 247 5626 \n Qaraghandy city: +7 (7212) 98 30 01 \n Shymkent city: +7 (725) 299 9900')
+    await callback.answer('Список службы поддержки по городам был выслан', show_alert = True)
+
+@dp.message_handler(content_types=["text"])
+async def requestandloan(message : types.Message):
+    if message.text.startswith("kzir"):
+        print(message)
+        trouble = message.text
+        print(trouble)
+        file1 = open("sample1.txt", "a")
+        file1.write(trouble + '\n\n')
+        file1.close()
+        flag2 = True
+        if flag2 == True:
+            await message.answer("Спасибо, принято. Мы обязательно с вами свяжемся")
+    if message.text.startswith("cl"):
+        print(message)
+        your_str = message.text
+        print(your_str)
+        a = your_str.split(' ')
+        b = int(a[1])
+        c = int(a[2])
+        d = b * (1.05 ** c)
+        flag = True
+        if flag == True:
+            await message.answer("Approximately: " + str(int(d)) + " KZT")
+
+executor.start_polling(dp, skip_updates = True)
+
+
+
+
